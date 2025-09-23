@@ -1,15 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Projects - Todo List App</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="app-container">
+// projectsPageDOM.js - DOM manipulation for the projects page
+
+export function createProjectsPageHTML() {
+    return `<div class="app-container">
             <!-- Header Section -->
             <header class="app-header">
                 <div class="header-content">
@@ -143,5 +135,98 @@
                 </div>
             </div>
         </div>
-</body>
-</html>
+    `;
+}
+
+export function setupModalEventListeners() {
+    // Open modal
+    const newProjectBtn = document.querySelector('.new-project-btn');
+    if (newProjectBtn) {
+        newProjectBtn.addEventListener('click', () => {
+            const modal = document.getElementById('new-project-modal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        });
+    }
+    
+    // Open modal
+    const newProjectCard = document.querySelector('.new-project-card');
+    if (newProjectCard) {
+        newProjectCard.addEventListener('click', () => {
+            const modal = document.getElementById('new-project-modal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        });
+    }
+    
+    // Modal overlay click to close
+    const modalOverlay = document.getElementById('new-project-modal');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Close button
+    const closeBtn = document.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    
+    // Cancel button
+    const cancelBtn = document.querySelector('.cancel-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeModal);
+    }
+    
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('new-project-modal');
+            if (modal && modal.classList.contains('active')) {
+                closeModal();
+            }
+        }
+    });
+    
+    // Form submission
+    const form = document.getElementById('new-project-form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            console.log('Form submitted:', Object.fromEntries(formData));
+            closeModal();
+        });
+    }
+    
+    // Color preset selection
+    const colorPresets = document.querySelectorAll('.color-preset');
+    colorPresets.forEach(preset => {
+        preset.addEventListener('click', (e) => {
+            const color = e.target.dataset.color;
+            const colorInput = document.getElementById('project-color');
+            if (colorInput) {
+                colorInput.value = color;
+            }
+            
+            // Update active state
+            colorPresets.forEach(p => p.classList.remove('active'));
+            e.target.classList.add('active');
+        });
+    });
+    
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('new-project-modal');
+            if (modal && modal.classList.contains('active')) {
+                closeModalFn();
+            }
+        }
+    });
+}
