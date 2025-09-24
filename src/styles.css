@@ -433,7 +433,7 @@ body {
 .modal-header h2 {
     font-size: 24px;
     font-weight: 600;
-    color: #2d3748;
+    color: linen;
 }
 
 .close-btn {
@@ -497,6 +497,12 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
+}
+
+#project-color {
+    background: none;
+    border: none;
+    padding: 0;
 }
 
 .color-picker input[type="color"] {

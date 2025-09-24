@@ -160,16 +160,24 @@ export function setupModalEventListeners() {
             }
         });
     }
-    
+
+    // Close modal
+    const closeModal = () => {
+        const modal = document.getElementById('new-project-modal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    };
+
     // Modal overlay click to close
-    const modalOverlay = document.getElementById('new-project-modal');
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                closeModal();
-            }
-        });
-    }
+    // const modalOverlay = document.getElementById('new-project-modal');
+    // if (modalOverlay) {
+    //     modalOverlay.addEventListener('click', (e) => {
+    //         if (e.target === modalOverlay) {
+    //             closeModal();
+    //         }
+    //     });
+    // }
     
     // Close button
     const closeBtn = document.querySelector('.close-btn');
@@ -218,15 +226,5 @@ export function setupModalEventListeners() {
             colorPresets.forEach(p => p.classList.remove('active'));
             e.target.classList.add('active');
         });
-    });
-    
-    // Escape key to close modal
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('new-project-modal');
-            if (modal && modal.classList.contains('active')) {
-                closeModalFn();
-            }
-        }
     });
 }

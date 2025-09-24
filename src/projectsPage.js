@@ -56,6 +56,28 @@ class Project {
         this.dueDate = dueDate;
     }
 
+    setID(id) {
+        this.id = id;
+    }
+    setDueDate(dueDate) {
+        this.dueDate = dueDate;
+    }
+    setTitle(title) {
+        this.title = title;
+    }
+    setDescription(description) {
+        this.description = description;
+    }
+    setColor(color) {
+        this.color = color;
+    }
+    setTasks(tasks) {
+        this.tasks = tasks;
+    }
+    setCompletedTasks(completedTasks) {
+        this.completedTasks = completedTasks;
+    }
+
     getID() {
         return this.id;
     }
