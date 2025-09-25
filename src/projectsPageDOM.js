@@ -1,4 +1,6 @@
 // projectsPageDOM.js - DOM manipulation for the projects page
+import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from 'date-fns';
+import { deleteProject } from './projectsPage.js';
 
 export function createProjectsPageHTML() {
     return `<div class="app-container">
@@ -243,4 +245,79 @@ export function setupModalEventListeners() {
             e.target.classList.add('active');
         });
     });
+}
+
+export function createProjectCardDOM(project) {
+    const projectsContainer = document.getElementById('projects-container');
+    if (!projectsContainer) {
+        console.error('Projects container not found');
+        return;
+    }
+
+    if (!project) {
+        console.error('Project object is null');
+        return;
+    }
+
+    const projectCard = document.createElement('div');
+    projectCard.classList.add('project-card');
+    projectCard.style.borderTop = `5px solid ${project.getColor()}`;
+
+    projectCard.innerHTML = `
+        <div class="project-card-header">
+            <h3>${project.getTitle()}</h3>
+            <div class="project-actions">
+                <button class="btn btn-icon edit-btn" title="Edit Project">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-icon delete-btn" title="Delete Project">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+        <p class="project-description">${project.getDescription() || 'No description provided.'}</p>
+        <div class="project-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${project.getProgress()}%; background-color: ${project.getColor()};"></div>
+            </div>
+            <span>${Math.round(project.getProgress())}% Complete</span>
+        </div>
+        <div class="project-footer">
+            <span class="due-date">
+                <i class="fas fa-calendar-alt"></i>
+                ${project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline'}
+            </span>
+            <span class="task-count">
+                <i class="fas fa-tasks"></i>
+                ${project.getTasks()} Tasks
+            </span>
+        </div>
+    `;
+
+    // Insert the new project card before the "New Project" card
+    const newProjectCard = document.querySelector('.new-project-card');
+    if (newProjectCard) {
+        projectsContainer.insertBefore(projectCard, newProjectCard);
+    } else {
+        projectsContainer.appendChild(projectCard);
+    }
+
+    // Add event listeners for edit and delete buttons if needed
+    const editBtn = projectCard.querySelector('.edit-btn');
+    const deleteBtn = projectCard.querySelector('.delete-btn');
+
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            console.log(`Edit project ID: ${project.getID()}`);
+            // Implement edit functionality
+        });
+    }
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            console.log(`Delete project ID: ${project.getID()}`);
+            projectsContainer.removeChild(projectCard);
+            deleteProject(project.getID());
+        });
+    }
 }

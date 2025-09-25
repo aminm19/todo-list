@@ -1,8 +1,9 @@
 // projectsPage.js - Main logic for the projects page
-import { createProjectsPageHTML, setupModalEventListeners } from './projectsPageDOM.js';
+import { createProjectsPageHTML, setupModalEventListeners, createProjectCardDOM } from './projectsPageDOM.js';
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from 'date-fns';
 
-let projects = [
+let projects = [];
+let testProjects = [
     {
         id: 1,
         title: "Website Redesign",
@@ -37,9 +38,9 @@ export function loadProjectsPage() {
     const htmlContent = createProjectsPageHTML();
     document.body.innerHTML = htmlContent;
     
-    for(const project of projects) {
+    for(const project of testProjects) {
         // TODO implementation of addProjectCard
-        // addProjectCard(project);
+        createProject(project.title, project.description, project.color, project.tasks, project.completedTasks, project.dueDate);
     }
     setupModalEventListeners();
 }
@@ -102,4 +103,37 @@ class Project {
     getProgress() {
         return this.tasks === 0 ? 0 : (this.completedTasks / this.tasks) * 100;
     }
+}
+
+export function createProject(title, description, color, tasks, completedTasks, dueDate) {
+    const id = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
+    const newProject = new Project(id, title, description, color, tasks, completedTasks, dueDate);
+    projects.push(newProject);
+    createProjectCardDOM(newProject);
+    return newProject;
+}
+
+export function getProjectById(id) {
+    return projects.find(project => project.id === id);
+}
+
+export function updateProject(id, updatedFields) {
+    const project = getProjectById(id);
+    if (project) {
+        Object.keys(updatedFields).forEach(field => {
+            if (field in project) {
+                project[field] = updatedFields[field];
+            }
+        });
+    }
+    return project;
+}
+
+export function deleteProject(id) {
+    projects = projects.filter(project => project.id !== id);
+    console.log(projects);
+}
+
+export function getAllProjects() {
+    return projects;
 }
