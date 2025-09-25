@@ -166,6 +166,22 @@ export function setupModalEventListeners() {
         const modal = document.getElementById('new-project-modal');
         if (modal) {
             modal.classList.remove('active');
+            
+            // Clear the form when modal closes
+            const form = document.getElementById('new-project-form');
+            if (form) {
+                form.reset();
+                
+                // Reset color presets active state
+                const colorPresets = document.querySelectorAll('.color-preset');
+                colorPresets.forEach(preset => preset.classList.remove('active'));
+                
+                // Reset color input to default
+                const colorInput = document.getElementById('project-color');
+                if (colorInput) {
+                    colorInput.value = '#667eea';
+                }
+            }
         }
     };
 

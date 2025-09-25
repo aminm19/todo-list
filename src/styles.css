@@ -433,7 +433,7 @@ body {
 .modal-header h2 {
     font-size: 24px;
     font-weight: 600;
-    color: linen;
+    /* color: linen; */
 }
 
 .close-btn {
@@ -671,17 +671,7 @@ body {
     font-size: 18px;
 }
 
-/* Loading Spinner */
-.loading-spinner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    color: #667eea;
-    font-size: 24px;
-}
-
-/* Dark mode support (optional) */
+/* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     body {
         background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
@@ -713,5 +703,9 @@ body {
     
     .modal {
         background: #2d3748;
+    }
+
+    .modal-header h2, .modal-header p {
+        color: linen;
     }
 }
