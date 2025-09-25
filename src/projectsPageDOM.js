@@ -1,6 +1,6 @@
 // projectsPageDOM.js - DOM manipulation for the projects page
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from 'date-fns';
-import { deleteProject } from './projectsPage.js';
+import { deleteProject, getProjectsLength, createProject } from './projectsPage.js';
 
 export function createProjectsPageHTML() {
     return `<div class="app-container">
@@ -33,7 +33,7 @@ export function createProjectsPageHTML() {
                                 <i class="fas fa-tasks"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>3</h3>
+                                <h3 id="active-projects-count">${getProjectsLength()}</h3>
                                 <p>Active Projects</p>
                             </div>
                         </div>
@@ -225,7 +225,12 @@ export function setupModalEventListeners() {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const formData = new FormData(form);
-            console.log('Form submitted:', Object.fromEntries(formData));
+            const name = formData.get('name');
+            const description = formData.get('description');
+            const color = formData.get('color') || '#667eea';
+            const deadline = formData.get('deadline');
+            createProject(name, description, color, 0, 0, deadline);
+            updateProjectsCount();
             closeModal();
         });
     }
@@ -318,6 +323,14 @@ export function createProjectCardDOM(project) {
             console.log(`Delete project ID: ${project.getID()}`);
             projectsContainer.removeChild(projectCard);
             deleteProject(project.getID());
+            updateProjectsCount();
         });
     }
+    updateProjectsCount();
+}
+
+export function updateProjectsCount() {
+    const num = document.getElementById('active-projects-count');
+    const projectCount = getProjectsLength();
+    num.textContent = projectCount;
 }

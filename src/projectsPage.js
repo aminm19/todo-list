@@ -33,6 +33,10 @@ let testProjects = [
     }
 ];
 
+export function getProjectsLength() {
+    return projects.length;
+}
+
 export function loadProjectsPage() {
     // Get the HTML and append it to the body
     const htmlContent = createProjectsPageHTML();
