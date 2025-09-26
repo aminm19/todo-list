@@ -44,7 +44,7 @@ export function createProjectsPageHTML() {
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>14</h3>
+                                <h3 id="completed-tasks-count">0</h3>
                                 <p>Completed Tasks</p>
                             </div>
                         </div>
@@ -53,7 +53,7 @@ export function createProjectsPageHTML() {
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>15</h3>
+                                <h3 id="pending-tasks-count">0</h3>
                                 <p>Pending Tasks</p>
                             </div>
                         </div>
@@ -412,7 +412,6 @@ export function createProjectCardDOM(project) {
     if (tasksBtn) {
         tasksBtn.addEventListener('click', () => {
             openTasksModal(project.getID());
-            setupTasksModalEventListeners();
         });
     }
     updateProjectsCount();

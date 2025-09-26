@@ -40,4 +40,5 @@ export function loadProjectsPage() {
         createProject(project.title, project.description, project.color, project.tasks.length, project.dueDate);
     }
     setupModalEventListeners();
+    setupTasksModalEventListeners();
 }

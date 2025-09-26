@@ -84,3 +84,22 @@ class Task {
         return this.completed;
     }
 }
+
+function getTotalTasks() {
+    const allProjects = getAllProjects();
+    return allProjects.reduce((sum, project) => sum + project.tasks.length, 0);
+}
+
+function getCompletedTasks() {
+    const allProjects = getAllProjects();
+    return allProjects.reduce((sum, project) => 
+        sum + project.tasks.filter(task => task.completed).length, 0);
+}
+
+function getPendingTasks() {
+    const allProjects = getAllProjects();
+    return allProjects.reduce((sum, project) => 
+        sum + project.tasks.filter(task => !task.completed).length, 0);
+}
+
+export { getTotalTasks, getCompletedTasks, getPendingTasks };

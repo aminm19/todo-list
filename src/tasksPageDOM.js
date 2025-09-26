@@ -1,5 +1,5 @@
 import { updateProjectProgress } from './projectsPageDOM.js';
-import { deleteTask, getTasksByProject } from './Task.js';
+import { deleteTask, getCompletedTasks, getTasksByProject, getTotalTasks } from './Task.js';
 
 export function refreshTasksList(projectId) {
     const tasksList = document.querySelector('.tasks-list');
@@ -63,11 +63,13 @@ export function addTaskToDOM(task) {
             alert('Failed to delete task.');
         }
         updateProjectProgress(); // Update project progress bar
+        updateTaskCount();
     });
     taskItem.appendChild(deleteBtn);
 
     tasksList.appendChild(taskItem);
     updateProjectProgress(); // Update project progress bar
+    updateTaskCount();
 }
 
 function updateStatus(taskId) {
@@ -80,4 +82,19 @@ function updateStatus(taskId) {
         }
     });
     updateProjectProgress(); // Update project progress bar
+    updateTaskCount();
+}
+
+function updateTaskCount() {
+    const totalTasks = getTotalTasks();
+    const completedTasks = getCompletedTasks();
+    const completedCountElem = document.getElementById('completed-tasks-count');
+    const pendingTasks = totalTasks - completedTasks;
+    const pendingCountElem = document.getElementById('pending-tasks-count');
+    if (pendingCountElem) {
+        pendingCountElem.textContent = pendingTasks;
+    }
+    if (completedCountElem) {
+        completedCountElem.textContent = completedTasks;
+    }
 }
