@@ -1,6 +1,8 @@
 // projectsPageDOM.js - DOM manipulation for the projects page
-import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from 'date-fns';
-import { deleteProject, getProjectsLength, createProject } from './projectsPage.js';
+import { format, formatDistanceToNow, isAfter, isBefore, parseISO, set } from 'date-fns';
+import { deleteProject, getProjectsLength, createProject, getProjectById } from './Project.js';
+import { createTask } from './Task.js';
+import { refreshTasksList } from './tasksPageDOM.js';
 
 export function createProjectsPageHTML() {
     return `<div class="app-container">
@@ -137,6 +139,38 @@ export function createProjectsPageHTML() {
                 </div>
             </div>
         </div>
+        <!-- Modal for tasks list -->
+        <div class="modal-overlay" id="tasks-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Tasks</h2>
+                    <button class="tasks-close-btn" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="tasks-container">
+                    <div class="tasks-list">
+                        <!-- Tasks will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="modal-content">
+                    <form class="new-task-form" id="new-task-form">
+                        <div class="form-group">
+                            <label for="task-title">Task Title</label>
+                            <input type="text" id="task-title" name="title" placeholder="Enter task title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-description">Description</label>
+                            <textarea id="task-description" name="description" placeholder="Brief description of your task"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary tasks-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary create-btn" form="new-task-form">Create Task</button>
+                </div>
+            </div>
+        </div>
     `;
 }
 
@@ -186,16 +220,6 @@ export function setupModalEventListeners() {
             }
         }
     };
-
-    // Modal overlay click to close
-    // const modalOverlay = document.getElementById('new-project-modal');
-    // if (modalOverlay) {
-    //     modalOverlay.addEventListener('click', (e) => {
-    //         if (e.target === modalOverlay) {
-    //             closeModal();
-    //         }
-    //     });
-    // }
     
     // Close button
     const closeBtn = document.querySelector('.close-btn');
@@ -229,7 +253,7 @@ export function setupModalEventListeners() {
             const description = formData.get('description');
             const color = formData.get('color') || '#667eea';
             const deadline = formData.get('deadline');
-            createProject(name, description, color, 0, 0, deadline);
+            createProject(name, description, color, 0, deadline);
             updateProjectsCount();
             closeModal();
         });
@@ -252,6 +276,60 @@ export function setupModalEventListeners() {
     });
 }
 
+export function setupTasksModalEventListeners() {
+    // Close tasks modal
+    const closeTasksModal = () => {
+        const tasksModal = document.getElementById('tasks-modal');
+        const form = document.getElementById('new-task-form');
+        if (form) {
+            form.reset();
+        }
+        if (tasksModal) {
+            tasksModal.classList.remove('active');
+        }
+    };
+    const closeBtn = document.querySelector('.tasks-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeTasksModal);
+    }
+    const cancelBtn = document.querySelector('.tasks-cancel-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeTasksModal);
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const tasksModal = document.getElementById('tasks-modal');
+            if (tasksModal && tasksModal.classList.contains('active')) {
+                closeTasksModal();
+            }
+        }
+    });
+    // Form submission for new task
+    const form = document.getElementById('new-task-form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const title = formData.get('title');
+            const description = formData.get('description');
+            createTask(currentProjectId, title, description);
+            console.log('New Task:', { title, description });
+            form.reset();
+        });
+    }
+}
+
+let currentProjectId = null; // Store the current project ID
+
+export function openTasksModal(projectId) {
+    currentProjectId = projectId; // Store which project's tasks we're managing
+    const tasksModal = document.getElementById('tasks-modal');
+    tasksModal.classList.add('active');
+    
+    // Refresh the tasks list to show current tasks only
+    refreshTasksList(projectId);
+}
+
 export function createProjectCardDOM(project) {
     const projectsContainer = document.getElementById('projects-container');
     if (!projectsContainer) {
@@ -266,6 +344,7 @@ export function createProjectCardDOM(project) {
 
     const projectCard = document.createElement('div');
     projectCard.classList.add('project-card');
+    projectCard.setAttribute('data-project-id', project.getID()); // Add project ID attribute
     projectCard.style.borderTop = `5px solid ${project.getColor()}`;
 
     projectCard.innerHTML = `
@@ -293,8 +372,10 @@ export function createProjectCardDOM(project) {
                 ${project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline'}
             </span>
             <span class="task-count">
-                <i class="fas fa-tasks"></i>
-                ${project.getTasks()} Tasks
+                <button class="tasks-btn">
+                    <i class="fas fa-tasks"></i>
+                    ${project.getTasks()} Tasks
+                </button>
             </span>
         </div>
     `;
@@ -310,6 +391,7 @@ export function createProjectCardDOM(project) {
     // Add event listeners for edit and delete buttons if needed
     const editBtn = projectCard.querySelector('.edit-btn');
     const deleteBtn = projectCard.querySelector('.delete-btn');
+    const tasksBtn = projectCard.querySelector('.tasks-btn');
 
     if (editBtn) {
         editBtn.addEventListener('click', () => {
@@ -326,6 +408,13 @@ export function createProjectCardDOM(project) {
             updateProjectsCount();
         });
     }
+
+    if (tasksBtn) {
+        tasksBtn.addEventListener('click', () => {
+            openTasksModal(project.getID());
+            setupTasksModalEventListeners();
+        });
+    }
     updateProjectsCount();
 }
 
@@ -333,4 +422,22 @@ export function updateProjectsCount() {
     const num = document.getElementById('active-projects-count');
     const projectCount = getProjectsLength();
     num.textContent = projectCount;
+}
+
+export function updateProjectProgress() {
+    const projects = document.querySelectorAll('.project-card');
+    projects.forEach(card => {
+        const projectId = parseInt(card.getAttribute('data-project-id'));
+        const project = getProjectById(projectId);
+        if (project) {
+            const progressFill = card.querySelector('.progress-fill');
+            const progressText = card.querySelector('.project-progress span');
+            if (progressFill && progressText) {
+                const progress = Math.round(project.getProgress());
+                progressFill.style.width = `${progress}%`;
+                progressFill.style.backgroundColor = project.getColor(); // Ensure color is updated too
+                progressText.textContent = `${progress}% Complete`;
+            }
+        }
+    });
 }
