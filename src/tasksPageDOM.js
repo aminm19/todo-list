@@ -1,4 +1,4 @@
-import { updateProjectProgress } from './projectsPageDOM.js';
+import { updateProjectProgress, updateTasksBtn } from './projectsPageDOM.js';
 import { deleteTask, getCompletedTasks, getTasksByProject, getTotalTasks } from './Task.js';
 
 export function refreshTasksList(projectId) {
@@ -64,12 +64,14 @@ export function addTaskToDOM(task) {
         }
         updateProjectProgress(); // Update project progress bar
         updateTaskCount();
+        updateTasksBtn(); // Update tasks button state
     });
     taskItem.appendChild(deleteBtn);
 
     tasksList.appendChild(taskItem);
     updateProjectProgress(); // Update project progress bar
     updateTaskCount();
+    updateTasksBtn(); // Update tasks button state
 }
 
 function updateStatus(taskId) {
@@ -83,9 +85,10 @@ function updateStatus(taskId) {
     });
     updateProjectProgress(); // Update project progress bar
     updateTaskCount();
+    updateTasksBtn(); // Update tasks button state
 }
 
-function updateTaskCount() {
+export function updateTaskCount() {
     const totalTasks = getTotalTasks();
     const completedTasks = getCompletedTasks();
     const completedCountElem = document.getElementById('completed-tasks-count');
@@ -98,3 +101,4 @@ function updateTaskCount() {
         completedCountElem.textContent = completedTasks;
     }
 }
+

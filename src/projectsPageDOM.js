@@ -2,7 +2,7 @@
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO, set } from 'date-fns';
 import { deleteProject, getProjectsLength, createProject, getProjectById } from './Project.js';
 import { createTask } from './Task.js';
-import { refreshTasksList } from './tasksPageDOM.js';
+import { refreshTasksList, updateTaskCount } from './tasksPageDOM.js';
 
 export function createProjectsPageHTML() {
     return `<div class="app-container">
@@ -374,7 +374,7 @@ export function createProjectCardDOM(project) {
             <span class="task-count">
                 <button class="tasks-btn">
                     <i class="fas fa-tasks"></i>
-                    ${project.getTasks()} Tasks
+                    <span class="tasks-count">${project.getTasks()}</span>Tasks
                 </button>
             </span>
         </div>
@@ -406,6 +406,8 @@ export function createProjectCardDOM(project) {
             projectsContainer.removeChild(projectCard);
             deleteProject(project.getID());
             updateProjectsCount();
+            updateTasksBtn(); // Update tasks button state
+            updateTaskCount(); // Update task count in stats
         });
     }
 
@@ -436,6 +438,20 @@ export function updateProjectProgress() {
                 progressFill.style.width = `${progress}%`;
                 progressFill.style.backgroundColor = project.getColor(); // Ensure color is updated too
                 progressText.textContent = `${progress}% Complete`;
+            }
+        }
+    });
+}
+
+export function updateTasksBtn() {
+    const projects = document.querySelectorAll('.project-card');
+    projects.forEach(card => {
+        const projectId = parseInt(card.getAttribute('data-project-id'));
+        const project = getProjectById(projectId);
+        if (project) {
+            const tasksCountElem = card.querySelector('.tasks-count');
+            if (tasksCountElem) {
+                tasksCountElem.textContent = project.getTasks().length;
             }
         }
     });
