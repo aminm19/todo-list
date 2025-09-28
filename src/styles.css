@@ -424,7 +424,7 @@ body {
 }
 
 /* Modal Styles */
-.modal-overlay, .tasks-modal-overlay {
+.modal-overlay, .tasks-modal-overlay, .edit-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -438,7 +438,7 @@ body {
     backdrop-filter: blur(4px);
 }
 
-.modal-overlay.active, .tasks-modal-overlay.active {
+.modal-overlay.active, .tasks-modal-overlay.active, .edit-modal-overlay.active {
     display: flex;
 }
 

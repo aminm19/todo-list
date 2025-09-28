@@ -1,6 +1,6 @@
 // projectsPageDOM.js - DOM manipulation for the projects page
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO, set } from 'date-fns';
-import { deleteProject, getProjectsLength, createProject, getProjectById } from './Project.js';
+import { deleteProject, getProjectsLength, createProject, getProjectById, updateProject } from './Project.js';
 import { createTask } from './Task.js';
 import { refreshTasksList, updateTaskCount } from './tasksPageDOM.js';
 
@@ -171,6 +171,51 @@ export function createProjectsPageHTML() {
                 </div>
             </div>
         </div>
+        <!-- Modal for editing project -->
+        <div class="modal-overlay" id="edit-modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Edit Project</h2>
+                    <button class="edit-close-btn" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <form class="edit-project-form" id="edit-project-form">
+                        <div class="form-group">
+                            <label for="project-name">Project Name</label>
+                            <input type="text" id="project-name" name="name" placeholder="Enter project name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-description">Description</label>
+                            <textarea id="project-description" name="description" placeholder="Brief description of your project"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-color">Color Theme</label>
+                            <div class="color-picker">
+                                <input type="color" id="project-color" name="color" value="#667eea">
+                                <div class="color-presets">
+                                    <button type="button" class="color-preset" style="background-color: #667eea;" data-color="#667eea"></button>
+                                    <button type="button" class="color-preset" style="background-color: #f093fb;" data-color="#f093fb"></button>
+                                    <button type="button" class="color-preset" style="background-color: #48cae4;" data-color="#48cae4"></button>
+                                    <button type="button" class="color-preset" style="background-color: #ffd166;" data-color="#ffd166"></button>
+                                    <button type="button" class="color-preset" style="background-color: #06ffa5;" data-color="#06ffa5"></button>
+                                    <button type="button" class="color-preset" style="background-color: #ff6b6b;" data-color="#ff6b6b"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-deadline">Deadline (Optional)</label>
+                            <input type="date" id="project-deadline" name="deadline">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary edit-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary save-btn" form="edit-project-form">Save Changes</button>
+                </div>
+            </div>
+        </div>
     `;
 }
 
@@ -274,6 +319,17 @@ export function setupModalEventListeners() {
             e.target.classList.add('active');
         });
     });
+
+    // Edit Modal Event Listeners
+    const editCloseBtn = document.querySelector('.edit-close-btn');
+    if (editCloseBtn) {
+        editCloseBtn.addEventListener('click', closeEditModal);
+    }
+    
+    const editCancelBtn = document.querySelector('.edit-cancel-btn');
+    if (editCancelBtn) {
+        editCancelBtn.addEventListener('click', closeEditModal);
+    }
 }
 
 export function setupTasksModalEventListeners() {
@@ -388,7 +444,7 @@ export function createProjectCardDOM(project) {
         projectsContainer.appendChild(projectCard);
     }
 
-    // Add event listeners for edit and delete buttons if needed
+    // Add event listeners for edit and delete buttons
     const editBtn = projectCard.querySelector('.edit-btn');
     const deleteBtn = projectCard.querySelector('.delete-btn');
     const tasksBtn = projectCard.querySelector('.tasks-btn');
@@ -396,7 +452,8 @@ export function createProjectCardDOM(project) {
     if (editBtn) {
         editBtn.addEventListener('click', () => {
             console.log(`Edit project ID: ${project.getID()}`);
-            // Implement edit functionality
+            openEditProjectModal(project.getID());
+            // updateCard(project.getID());
         });
     }
 
@@ -455,4 +512,105 @@ export function updateTasksBtn() {
             }
         }
     });
+}
+
+export function openEditProjectModal(projectId) {
+    const project = getProjectById(projectId);
+    if (!project) {
+        console.error('Project not found for editing');
+        return;
+    }
+
+    const modal = document.getElementById('edit-modal-overlay');
+    console.log('Edit modal element:', modal);
+    if (modal) {
+        modal.classList.add('active');
+
+        // Populate form with existing project data
+        const form = document.getElementById('edit-project-form');
+        if (form) {
+            form.elements['name'].value = project.getTitle();
+            form.elements['description'].value = project.getDescription();
+            form.elements['color'].value = project.getColor();
+            form.elements['deadline'].value = project.getDueDate() || '';
+
+            // Update color presets active state
+            const colorPresets = document.querySelectorAll('.color-preset');
+            colorPresets.forEach(preset => {
+                if (preset.dataset.color === project.getColor()) {
+                    preset.classList.add('active');
+                } else {
+                    preset.classList.remove('active');
+                }
+            });
+        }
+        // Update form submission to handle editing
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const name = formData.get('name');
+            const description = formData.get('description');
+            const color = formData.get('color') || '#667eea';
+            const deadline = formData.get('deadline');
+
+            // Update project details
+            project.setTitle(name);
+            project.setDescription(description);
+            project.setColor(color);
+            project.setDueDate(deadline);
+
+            // // Update the project card in the DOM
+            updateCard(projectId);
+
+            // Close modal
+            modal.classList.remove('active');
+            form.reset();
+            form.onsubmit = null; // Reset to prevent handler buildup
+        };
+    }
+}
+export function closeEditModal() {
+    const modal = document.getElementById('edit-modal-overlay');
+    if (modal) {
+        modal.classList.remove('active');
+
+        // Clear the form when modal closes
+        const form = document.getElementById('edit-project-form');
+        if (form) {
+            form.reset();
+
+            // Reset color presets active state
+            const colorPresets = document.querySelectorAll('.color-preset');
+            colorPresets.forEach(preset => preset.classList.remove('active'));
+
+            // Reset color input to default
+            const colorInput = document.getElementById('project-color');
+            if (colorInput) {
+                colorInput.value = '#667eea';
+            }
+        }
+    }
+}
+
+function updateCard(projectId) {
+    const project = getProjectById(projectId);
+    if (!project) {
+        console.error('Project not found for updating card');
+        return;
+    }
+
+    const projectCard = document.querySelector(`.project-card[data-project-id="${projectId}"]`);
+    if (!projectCard) {
+        console.error('Project card not found for updating');
+        return;
+    }
+
+    // Update the project card content
+    projectCard.querySelector('h3').textContent = project.getTitle();
+    projectCard.querySelector('.project-description').textContent = project.getDescription() || 'No description provided.';
+    projectCard.querySelector('.due-date').textContent = project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline';
+    const tasksCountElem = projectCard.querySelector('.tasks-count');
+    if (tasksCountElem) {
+        tasksCountElem.textContent = project.getTasks().length;
+    }
 }
