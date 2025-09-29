@@ -330,6 +330,21 @@ export function setupModalEventListeners() {
     if (editCancelBtn) {
         editCancelBtn.addEventListener('click', closeEditModal);
     }
+
+    const editColorPresets = document.querySelectorAll('#edit-modal-overlay .color-preset');
+    editColorPresets.forEach(preset => {
+        preset.addEventListener('click', (e) => {
+            const color = e.target.dataset.color;
+            const colorInput = document.querySelector('#edit-modal-overlay #project-color');
+            if (colorInput) {
+                colorInput.value = color;
+            }
+            
+            // Update active state
+            editColorPresets.forEach(p => p.classList.remove('active'));
+            e.target.classList.add('active');
+        });
+    });
 }
 
 export function setupTasksModalEventListeners() {
@@ -609,6 +624,7 @@ function updateCard(projectId) {
     projectCard.querySelector('h3').textContent = project.getTitle();
     projectCard.querySelector('.project-description').textContent = project.getDescription() || 'No description provided.';
     projectCard.querySelector('.due-date').textContent = project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline';
+    projectCard.style.borderTop = `5px solid ${project.getColor()}`;
     const tasksCountElem = projectCard.querySelector('.tasks-count');
     if (tasksCountElem) {
         tasksCountElem.textContent = project.getTasks().length;
