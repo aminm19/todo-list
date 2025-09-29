@@ -84,8 +84,8 @@ function updateStatus(taskId) {
         }
     });
     updateProjectProgress(); // Update project progress bar
-    updateTaskCount();
-    updateTasksBtn(); // Update tasks button state
+    updateTaskCount(); // Update total task counts at top of page
+    updateTasksBtn(); // Update tasks button state on each project card to show number of tasks
 }
 
 export function updateTaskCount() {

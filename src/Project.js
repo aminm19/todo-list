@@ -1,4 +1,5 @@
 import { createProjectCardDOM } from './projectsPageDOM.js';
+import { format, parseISO, formatDistance } from 'date-fns';
 
 let projects = [];
 
@@ -102,7 +103,6 @@ export function updateProject(id, updatedFields) {
 
 export function deleteProject(id) {
     projects = projects.filter(project => project.id !== id);
-    console.log(projects);
 }
 
 export function getAllProjects() {
@@ -122,3 +122,54 @@ export function removeTaskFromProject(projectId, taskId) {
         project.removeTask(taskId);
     }
 }
+
+export function isOverdue(project) {
+    if (!project.dueDate) return false;
+    const due = new Date(project.dueDate);
+    const now = new Date();
+    return due < now;
+}
+
+export function formatDueDate(dueDate) {
+    if (!dueDate) return "No due date";
+    
+    // Parse date in local timezone to avoid UTC conversion issues
+    let date;
+    if (typeof dueDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+        // YYYY-MM-DD format
+        const [year, month, day] = dueDate.split('-').map(Number);
+        date = new Date(year, month - 1, day); // month is 0-based, creates local midnight
+    } else if (typeof dueDate === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dueDate)) {
+        // MM-dd-yyyy format
+        const [month, day, year] = dueDate.split('-').map(Number);
+        date = new Date(year, month - 1, day); // month is 0-based, creates local midnight
+    } else {
+        date = new Date(dueDate);
+    }
+    
+    // Create "now" at midnight for proper comparison
+    const now = new Date();
+    const nowAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let dateStr = format(date, 'yyyy-MM-dd');
+    let nowStr = format(nowAtMidnight, 'yyyy-MM-dd');
+
+    console.log('dueDate input:', dueDate);
+    console.log('dateStr:', dateStr);
+    console.log('nowStr:', nowStr);
+    console.log('dateStr === nowStr:', dateStr === nowStr);
+
+    if (dateStr === nowStr) {
+        console.log('Should return Due today!');
+        return "Due today!";
+    }
+    if (date < nowAtMidnight) {
+        return `Overdue by ${formatDistance(date, nowAtMidnight)}`;
+    } else {
+        console.log('Future date calculation:');
+        console.log('- date object:', date);
+        console.log('- nowAtMidnight object:', nowAtMidnight);
+        console.log('- formatDistance result:', formatDistance(nowAtMidnight, date));
+        return `Due in ${formatDistance(nowAtMidnight, date)}`;
+    }
+} 

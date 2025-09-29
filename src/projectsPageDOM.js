@@ -1,6 +1,6 @@
 // projectsPageDOM.js - DOM manipulation for the projects page
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO, set } from 'date-fns';
-import { deleteProject, getProjectsLength, createProject, getProjectById, updateProject } from './Project.js';
+import { deleteProject, getProjectsLength, createProject, getProjectById, updateProject, formatDueDate } from './Project.js';
 import { createTask } from './Task.js';
 import { refreshTasksList, updateTaskCount } from './tasksPageDOM.js';
 
@@ -376,7 +376,7 @@ export function setupTasksModalEventListeners() {
             const title = formData.get('title');
             const description = formData.get('description');
             createTask(currentProjectId, title, description);
-            console.log('New Task:', { title, description });
+            // console.log('New Task:', { title, description });
             form.reset();
         });
     }
@@ -432,7 +432,7 @@ export function createProjectCardDOM(project) {
         <div class="project-footer">
             <span class="due-date">
                 <i class="fas fa-calendar-alt"></i>
-                ${project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline'}
+                ${project.getDueDate() ? dueDateDOM(project.getDueDate()) : ''}
             </span>
             <span class="task-count">
                 <button class="tasks-btn">
@@ -480,6 +480,10 @@ export function createProjectCardDOM(project) {
             openTasksModal(project.getID());
         });
     }
+    
+    // Apply date styling
+    updateDateStyle();
+    
     updateProjectsCount();
 }
 
@@ -539,7 +543,7 @@ export function openEditProjectModal(projectId) {
             form.elements['name'].value = project.getTitle();
             form.elements['description'].value = project.getDescription();
             form.elements['color'].value = project.getColor();
-            form.elements['deadline'].value = project.getDueDate() || '';
+            form.elements['deadline'].value = format(project.getDueDate(), 'yyyy-MM-dd') || '';
 
             // Update color presets active state
             const colorPresets = document.querySelectorAll('.color-preset');
@@ -560,11 +564,20 @@ export function openEditProjectModal(projectId) {
             const color = formData.get('color') || '#667eea';
             const deadline = formData.get('deadline');
 
+            console.log('SAVE DEBUG:');
+            console.log('- deadline from form:', deadline);
+            console.log('- project.getDueDate() BEFORE save:', project.getDueDate());
+
             // Update project details
             project.setTitle(name);
             project.setDescription(description);
             project.setColor(color);
-            project.setDueDate(deadline);
+            // Convert yyyy-MM-dd to MM-dd-yyyy without timezone conversion
+            const [year, month, day] = deadline.split('-');
+            const formattedDeadline = `${month}-${day}-${year}`;
+            project.setDueDate(formattedDeadline);
+            
+            console.log('- project.getDueDate() AFTER save:', project.getDueDate());
 
             // // Update the project card in the DOM
             updateCard(projectId);
@@ -615,7 +628,8 @@ function updateCard(projectId) {
     // Update the project card content
     projectCard.querySelector('h3').textContent = project.getTitle();
     projectCard.querySelector('.project-description').textContent = project.getDescription() || 'No description provided.';
-    projectCard.querySelector('.due-date').textContent = project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline';
+    projectCard.querySelector('.due-date').innerHTML = project.getDueDate() ? `Due: ${dueDateDOM(project.getDueDate())}` : 'No deadline';
+
     projectCard.style.borderTop = `5px solid ${project.getColor()}`;
     const progressFill = projectCard.querySelector('.progress-fill');
     const progressText = projectCard.querySelector('.project-progress span');
@@ -629,4 +643,31 @@ function updateCard(projectId) {
     if (tasksCountElem) {
         tasksCountElem.textContent = project.getTasks().length;
     }
+    
+    // Apply date styling after updating the due date
+    updateDateStyle();
+}
+
+function dueDateDOM(dueDate) {
+    const formattedDueDate = formatDueDate(dueDate);
+    if (formattedDueDate.includes('Overdue')) {
+        return `<span class="overdue">${formattedDueDate}</span>`;
+    } else if (formattedDueDate.includes('today')) {
+        return `<span class="today">${formattedDueDate}</span>`;
+    } else {
+        return `<span class="upcoming">${formattedDueDate}</span>`;
+    }
+}
+
+function updateDateStyle() {
+    const dueDateElements = document.querySelectorAll('.overdue, .upcoming, .today');
+    dueDateElements.forEach(elem => {
+        if (elem.classList.contains('overdue')) {
+            elem.style.color = '#ff4d4d'; // Red for overdue
+        } else if (elem.classList.contains('today')) {
+            elem.style.color = '#ffa500'; // Orange for today
+        } else {
+            elem.style.color = '#4caf50'; // Green for upcoming
+        }
+    });
 }
