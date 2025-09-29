@@ -625,6 +625,14 @@ function updateCard(projectId) {
     projectCard.querySelector('.project-description').textContent = project.getDescription() || 'No description provided.';
     projectCard.querySelector('.due-date').textContent = project.getDueDate() ? `Due: ${project.getDueDate()}` : 'No deadline';
     projectCard.style.borderTop = `5px solid ${project.getColor()}`;
+    const progressFill = projectCard.querySelector('.progress-fill');
+    const progressText = projectCard.querySelector('.project-progress span');
+    if (progressFill && progressText) {
+        const progress = Math.round(project.getProgress());
+        progressFill.style.width = `${progress}%`;
+        progressFill.style.backgroundColor = project.getColor();
+        progressText.textContent = `${progress}% Complete`;
+    }
     const tasksCountElem = projectCard.querySelector('.tasks-count');
     if (tasksCountElem) {
         tasksCountElem.textContent = project.getTasks().length;
