@@ -543,7 +543,18 @@ export function openEditProjectModal(projectId) {
             form.elements['name'].value = project.getTitle();
             form.elements['description'].value = project.getDescription();
             form.elements['color'].value = project.getColor();
-            form.elements['deadline'].value = format(project.getDueDate(), 'yyyy-MM-dd') || '';
+            const dueDate = project.getDueDate();
+            if (dueDate) {
+                // Convert MM-dd-yyyy to yyyy-MM-dd for HTML date input
+                if (/^\d{2}-\d{2}-\d{4}$/.test(dueDate)) {
+                    const [month, day, year] = dueDate.split('-');
+                    form.elements['deadline'].value = `${year}-${month}-${day}`;
+                } else {
+                    form.elements['deadline'].value = dueDate;
+                }
+            } else {
+                form.elements['deadline'].value = '';
+            }
 
             // Update color presets active state
             const colorPresets = document.querySelectorAll('.color-preset');

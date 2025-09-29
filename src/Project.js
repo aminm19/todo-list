@@ -151,25 +151,20 @@ export function formatDueDate(dueDate) {
     const now = new Date();
     const nowAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+    // Check if date is valid before formatting
+    if (isNaN(date.getTime())) {
+        return "No Deadline";
+    }
+    
     let dateStr = format(date, 'yyyy-MM-dd');
     let nowStr = format(nowAtMidnight, 'yyyy-MM-dd');
 
-    console.log('dueDate input:', dueDate);
-    console.log('dateStr:', dateStr);
-    console.log('nowStr:', nowStr);
-    console.log('dateStr === nowStr:', dateStr === nowStr);
-
     if (dateStr === nowStr) {
-        console.log('Should return Due today!');
         return "Due today!";
     }
     if (date < nowAtMidnight) {
         return `Overdue by ${formatDistance(date, nowAtMidnight)}`;
     } else {
-        console.log('Future date calculation:');
-        console.log('- date object:', date);
-        console.log('- nowAtMidnight object:', nowAtMidnight);
-        console.log('- formatDistance result:', formatDistance(nowAtMidnight, date));
         return `Due in ${formatDistance(nowAtMidnight, date)}`;
     }
 } 
