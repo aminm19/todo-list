@@ -64,14 +64,6 @@ export function createProjectsPageHTML() {
                 <section class="projects-section">
                     <div class="section-header">
                         <h2>Your Projects</h2>
-                        <div class="view-controls">
-                            <button class="view-btn active" data-view="grid">
-                                <i class="fas fa-th-large"></i>
-                            </button>
-                            <button class="view-btn" data-view="list">
-                                <i class="fas fa-list"></i>
-                            </button>
-                        </div>
                     </div>
 
                     <div class="projects-grid" id="projects-container">

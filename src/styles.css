@@ -742,7 +742,7 @@ body {
 .modal-header h2 {
     font-size: 24px;
     font-weight: 600;
-    /* color: linen; */
+    color: linen;
 }
 
 .close-btn, .tasks-close-btn {
@@ -777,7 +777,8 @@ body {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #4a5568;
+    /* color: #4a5568; */
+    color: linen;
 }
 
 .form-group input,
