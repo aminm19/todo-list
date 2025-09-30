@@ -745,7 +745,7 @@ body {
     color: linen;
 }
 
-.close-btn, .tasks-close-btn {
+.close-btn, .tasks-close-btn, .edit-close-btn {
     background: none;
     border: none;
     font-size: 20px;
@@ -760,7 +760,7 @@ body {
     transition: all 0.2s ease;
 }
 
-.close-btn:hover, .tasks-close-btn:hover {
+.close-btn:hover, .tasks-close-btn:hover, .edit-close-btn:hover {
     background: #f7fafc;
     color: #718096;
 }
