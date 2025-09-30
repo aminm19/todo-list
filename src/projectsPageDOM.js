@@ -1,6 +1,6 @@
 // projectsPageDOM.js - DOM manipulation for the projects page
 import { format, formatDistanceToNow, isAfter, isBefore, parseISO, set } from 'date-fns';
-import { deleteProject, getProjectsLength, createProject, getProjectById, updateProject, formatDueDate } from './Project.js';
+import { deleteProject, getProjectsLength, createProject, getProjectById, updateProject, formatDueDate, saveProjectsToLocalStorage } from './Project.js';
 import { createTask } from './Task.js';
 import { refreshTasksList, updateTaskCount } from './tasksPageDOM.js';
 
@@ -437,7 +437,7 @@ export function createProjectCardDOM(project) {
             <span class="task-count">
                 <button class="tasks-btn">
                     <i class="fas fa-tasks"></i>
-                    <span class="tasks-count">${project.getTasks()}</span>Tasks
+                    <span class="tasks-count">${project.getTasks().length}</span>Tasks
                 </button>
             </span>
         </div>
@@ -575,10 +575,6 @@ export function openEditProjectModal(projectId) {
             const color = formData.get('color') || '#667eea';
             const deadline = formData.get('deadline');
 
-            console.log('SAVE DEBUG:');
-            console.log('- deadline from form:', deadline);
-            console.log('- project.getDueDate() BEFORE save:', project.getDueDate());
-
             // Update project details
             project.setTitle(name);
             project.setDescription(description);
@@ -587,11 +583,10 @@ export function openEditProjectModal(projectId) {
             const [year, month, day] = deadline.split('-');
             const formattedDeadline = `${month}-${day}-${year}`;
             project.setDueDate(formattedDeadline);
-            
-            console.log('- project.getDueDate() AFTER save:', project.getDueDate());
 
             // // Update the project card in the DOM
             updateCard(projectId);
+            saveProjectsToLocalStorage();
 
             // Close modal
             modal.classList.remove('active');

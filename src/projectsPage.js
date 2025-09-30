@@ -1,7 +1,8 @@
 // projectsPage.js - Main logic for the projects page
 import { createProjectsPageHTML, setupModalEventListeners, createProjectCardDOM, setupTasksModalEventListeners } from './projectsPageDOM.js';
-import { format, formatDistanceToNow, isAfter, isBefore, parseISO, setDate } from 'date-fns';
-import { createProject } from './Project.js';
+import { add, format, formatDistanceToNow, isAfter, isBefore, parseISO, setDate } from 'date-fns';
+import { createProject, loadProjectsFromLocalStorage } from './Project.js';
+import { updateTaskCount } from './tasksPageDOM.js';
 
 
 // Calculate dates manually to avoid timezone issues
@@ -58,9 +59,16 @@ export function loadProjectsPage() {
     document.body.innerHTML = htmlContent;
     
     for(const project of testProjects) {
-        // TODO implementation of addProjectCard
-        createProject(project.title, project.description, project.color, project.tasks.length, project.dueDate);
+        //createProjectCardDOM(project);
+        //createProject(project.title, project.description, project.color, project.tasks.length, project.dueDate);
     }
+
+    // Load user projects from localStorage
+    const storedProjects = loadProjectsFromLocalStorage();
+    for (const project of storedProjects) {
+        createProjectCardDOM(project);
+    }
+    updateTaskCount();
     setupModalEventListeners();
     setupTasksModalEventListeners();
 }

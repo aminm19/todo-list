@@ -1,5 +1,5 @@
 import { add } from 'date-fns';
-import { getProjectById, getAllProjects } from './Project.js';
+import { getProjectById, getAllProjects, saveProjectsToLocalStorage } from './Project.js';
 import { addTaskToDOM } from './tasksPageDOM.js';
 
 export function createTask(projectId, title, description, completed = false) {
@@ -19,6 +19,9 @@ export function createTask(projectId, title, description, completed = false) {
     
     // Update project task count
     project.taskCount = project.tasks.length;
+    
+    // Save to localStorage
+    saveProjectsToLocalStorage();
     
     addTaskToDOM(newTask);
     return newTask;
@@ -43,12 +46,16 @@ export function deleteTask(projectId, taskId) {
         project.taskCount = project.tasks.length;
         console.log('After deletion:', project.tasks.map(t => ({id: t.id, title: t.title})));
         console.log(`Deleted ${initialLength - project.tasks.length} task(s)`);
+        
+        // Save to localStorage
+        saveProjectsToLocalStorage();
+        
         return true;
     }
     return false;
 }
 
-class Task {
+export class Task {
     constructor(id, title, description, completed = false, projectId) {
         this.id = id;
         this.title = title;

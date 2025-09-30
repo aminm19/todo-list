@@ -1,7 +1,12 @@
 import { createProjectCardDOM } from './projectsPageDOM.js';
 import { format, parseISO, formatDistance } from 'date-fns';
+import { Task } from './Task.js';
 
 let projects = [];
+
+export function clearProjects() {
+    projects = [];
+}
 
 export function getProjectsLength() {
     return projects.length;
@@ -81,6 +86,7 @@ export function createProject(title, description, color, taskCount, dueDate) {
     const id = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
     const newProject = new Project(id, title, description, color, taskCount, dueDate);
     projects.push(newProject);
+    saveProjectsToLocalStorage();
     createProjectCardDOM(newProject);
     return newProject;
 }
@@ -98,11 +104,13 @@ export function updateProject(id, updatedFields) {
             }
         });
     }
+    saveProjectsToLocalStorage();
     return project;
 }
 
 export function deleteProject(id) {
     projects = projects.filter(project => project.id !== id);
+    saveProjectsToLocalStorage();
 }
 
 export function getAllProjects() {
@@ -114,6 +122,7 @@ export function addTaskToProject(projectId, task) {
     if (project) {
         project.addTask(task);
     }
+    saveProjectsToLocalStorage();
 }
 
 export function removeTaskFromProject(projectId, taskId) {
@@ -121,6 +130,7 @@ export function removeTaskFromProject(projectId, taskId) {
     if (project) {
         project.removeTask(taskId);
     }
+    saveProjectsToLocalStorage();
 }
 
 export function isOverdue(project) {
@@ -168,3 +178,40 @@ export function formatDueDate(dueDate) {
         return `Due in ${formatDistance(nowAtMidnight, date)}`;
     }
 } 
+
+export function saveProjectsToLocalStorage() {
+    localStorage.setItem('projects', JSON.stringify(projects));
+}
+
+export function loadProjectsFromLocalStorage() {
+    const storedProjects = JSON.parse(localStorage.getItem('projects')) || [];
+    projects = storedProjects.map(projData => {
+        const project = new Project(
+            projData.id,
+            projData.title,
+            projData.description,
+            projData.color,
+            0, // Initialize taskCount as 0, will be updated below
+            projData.dueDate
+        );
+        // Reconstruct tasks as Task class instances
+        if (Array.isArray(projData.tasks)) {
+            project.tasks = projData.tasks.map(taskData => {
+                // Reconstruct Task objects with all their methods
+                return new Task(
+                    taskData.id,
+                    taskData.title,
+                    taskData.description,
+                    taskData.completed,
+                    taskData.projectId
+                );
+            });
+            project.taskCount = project.tasks.length;
+        } else {
+            project.tasks = []; // Ensure tasks is always an array, in case of object insertion
+            project.taskCount = 0;
+        }
+        return project;
+    });
+    return projects; // Return the loaded projects
+}

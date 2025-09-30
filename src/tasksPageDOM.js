@@ -1,5 +1,6 @@
 import { updateProjectProgress, updateTasksBtn } from './projectsPageDOM.js';
-import { deleteTask, getCompletedTasks, getTasksByProject, getTotalTasks } from './Task.js';
+import { deleteTask, getCompletedTasks, getTasksByProject, getTotalTasks, getID } from './Task.js';
+import { saveProjectsToLocalStorage } from './Project.js';
 
 export function refreshTasksList(projectId) {
     const tasksList = document.querySelector('.tasks-list');
@@ -33,6 +34,8 @@ export function addTaskToDOM(task) {
     checkbox.addEventListener('change', () => {
         task.setCompleted(checkbox.checked);
         updateStatus(task.getID());
+        // Save changes to localStorage
+        saveProjectsToLocalStorage();
     });
     taskItem.appendChild(checkbox);
 
